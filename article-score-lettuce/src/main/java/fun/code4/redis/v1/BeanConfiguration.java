@@ -1,6 +1,5 @@
-package fun.code4.redis.v1.config;
+package fun.code4.redis.v1;
 
-import fun.code4.redis.v1.service.ArticleService;
 import io.lettuce.core.RedisClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +14,7 @@ public class BeanConfiguration {
   }
 
   @Bean
-  public ArticleService articleService(RedisClient redisClient) {
-    return new ArticleService(redisClient);
+  public ArticleServiceV1 articleService(RedisClient redisClient) {
+    return new ArticleServiceV1(redisClient);
   }
 }

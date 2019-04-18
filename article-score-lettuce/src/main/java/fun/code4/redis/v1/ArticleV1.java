@@ -1,17 +1,27 @@
-package fun.code4.redis.v1.model;
+package fun.code4.redis.v1;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class Article {
+public class ArticleV1 {
 
   private Long id;
   private String title;
   private String link;
   private String poster;
-  private String time;
+  private long time;
   private Integer votes;
+
+  public ArticleV1() {}
+
+  public ArticleV1(String title, String link, String poster, long time, Integer votes) {
+    this.title = title;
+    this.link = link;
+    this.poster = poster;
+    this.time = time;
+    this.votes = votes;
+  }
 
   public Long getId() {
     return id;
@@ -45,11 +55,11 @@ public class Article {
     this.poster = poster;
   }
 
-  public String getTime() {
+  public long getTime() {
     return time;
   }
 
-  private void setTime(String time) {
+  private void setTime(long time) {
     this.time = time;
   }
 
@@ -61,11 +71,11 @@ public class Article {
     this.votes = votes;
   }
 
-  public static Article from(Map<String, String> dataMap) {
-    Article article = new Article();
+  public static ArticleV1 from(Map<String, String> dataMap) {
+    ArticleV1 article = new ArticleV1();
     article.setLink(dataMap.get("link"));
     article.setPoster(dataMap.get("poster"));
-    article.setTime(dataMap.get("time"));
+    article.setTime(Long.parseLong(dataMap.get("time")));
     article.setVotes(Integer.parseInt(dataMap.get("votes")));
     article.setTitle(dataMap.get("title"));
     String idVal = dataMap.get("id");
@@ -75,14 +85,14 @@ public class Article {
     return article;
   }
 
-  public static Map<String, String> to(Article article) {
+  public Map<String, String> toMap() {
     Map<String, String> ret = new HashMap<>();
-    ret.put("id", article.getId().toString());
-    ret.put("title", article.getTitle());
-    ret.put("link", article.getLink());
-    ret.put("poster", article.getPoster());
-    ret.put("time", article.getTime());
-    ret.put("votes", article.getVotes().toString());
+    ret.put("id", this.getId().toString());
+    ret.put("title", this.getTitle());
+    ret.put("link", this.getLink());
+    ret.put("poster", this.getPoster());
+    ret.put("time", Long.toString(this.getTime()));
+    ret.put("votes", this.getVotes().toString());
     return ret;
   }
 }
