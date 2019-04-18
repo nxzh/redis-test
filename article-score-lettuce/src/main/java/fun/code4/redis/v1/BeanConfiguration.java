@@ -9,7 +9,7 @@ public class BeanConfiguration {
 
   @Bean(destroyMethod = "shutdown")
   public RedisClient redisClient() {
-    RedisClient redisClient = RedisClient.create("redis://10.61.213.105:8087/0");
+    RedisClient redisClient = RedisClient.create("redis://10.61.213.105:8087");
     return redisClient;
   }
 
