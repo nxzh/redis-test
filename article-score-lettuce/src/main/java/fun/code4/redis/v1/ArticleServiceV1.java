@@ -79,12 +79,12 @@ public class ArticleServiceV1 {
       // 往集合中添加元素, key为article:article_id, 分值为发帖时间 + 1次投票的分数
       commands.zadd(
           RedisKeys.SCORE,
-          RedisKeys.articleKey(nextArticleId),
-          now + VOTE_SCORE);
+          now + VOTE_SCORE,
+          RedisKeys.articleKey(nextArticleId));
       // 记录 article 的发帖时间
       // zset 操作: time:
       // 往集合中添加元素, key 为 article:article_id 分值为发帖时间
-      commands.zadd(RedisKeys.TIME, RedisKeys.articleKey(article.getId()), now);
+      commands.zadd(RedisKeys.TIME, now, RedisKeys.articleKey(nextArticleId));
       return nextArticleId;
     }
   }

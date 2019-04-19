@@ -87,12 +87,23 @@ public class ArticleV1 {
 
   public Map<String, String> toMap() {
     Map<String, String> ret = new HashMap<>();
-    ret.put("id", this.getId().toString());
     ret.put("title", this.getTitle());
     ret.put("link", this.getLink());
     ret.put("poster", this.getPoster());
     ret.put("time", Long.toString(this.getTime()));
     ret.put("votes", this.getVotes().toString());
     return ret;
+  }
+
+  @Override
+  public String toString() {
+    return "ArticleV1{" +
+        "id=" + id +
+        ", title='" + title + '\'' +
+        ", link='" + link + '\'' +
+        ", poster='" + poster + '\'' +
+        ", time=" + time +
+        ", votes=" + votes +
+        '}';
   }
 }

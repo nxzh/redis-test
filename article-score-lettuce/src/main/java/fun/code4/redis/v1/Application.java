@@ -50,5 +50,9 @@ public class Application {
       ids.add(id);
       System.out.println("New Post with id: " + id);
     }
+    List<ArticleV1> articleV1s = articleService.getArticles(1, 10);
+    for (ArticleV1 articleV1 : articleV1s) {
+      System.out.println(articleV1);
+    }
   }
 }
