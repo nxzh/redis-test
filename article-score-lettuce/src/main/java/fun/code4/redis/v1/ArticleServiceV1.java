@@ -106,6 +106,7 @@ public class ArticleServiceV1 {
             // hash 操作: zset
             // 返回 key 为 article:article_id 的所有数据
             Map<String, String> dataMap = commands.hgetall(id);
+            dataMap.put("id", id);
             articles.add(ArticleV1.from(dataMap));
           });
     }
