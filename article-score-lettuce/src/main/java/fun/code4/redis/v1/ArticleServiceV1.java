@@ -3,10 +3,12 @@ package fun.code4.redis.v1;
 import static fun.code4.redis.v1.ArticleServiceV1.RedisKeys.votedKey;
 
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.ZStoreArgs;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +30,14 @@ public class ArticleServiceV1 {
     }
   }
 
-  public void vote(long userId, long articleId) {
+  public void downVote(long userId, long articleId) {
+    try (StatefulRedisConnection<String, String> conn = redisClient.connect()) {
+      RedisCommands<String, String> commands = conn.sync();
+
+    }
+  }
+
+  public void upVote(long userId, long articleId) {
     try (StatefulRedisConnection<String, String> conn = redisClient.connect()) {
       RedisCommands<String, String> commands = conn.sync();
       long cutoff = Instant.now().getEpochSecond() - ONE_WEEK_IN_SECONDS;
@@ -89,7 +98,10 @@ public class ArticleServiceV1 {
     }
   }
 
-  public List<ArticleV1> getArticles(int page, int size) {
+  public List<ArticleV1> getArticles(String order, int page, int size) {
+    if (order == null) {
+      order = RedisKeys.SCORE;
+    }
     List<ArticleV1> articles = new ArrayList<>(size);
     try (StatefulRedisConnection<String, String> conn = redisClient.connect()) {
       RedisCommands<String, String> commands = conn.sync();
@@ -99,7 +111,7 @@ public class ArticleServiceV1 {
       // 查找符合情况的 id 列表
       // zset 操作: score:
       // 按分数倒序返回 id 列表
-      List<String> ids = commands.zrevrange(RedisKeys.SCORE, start, end);
+      List<String> ids = commands.zrevrange(order, start, end);
       ids.forEach(
           id -> {
             // 按 id 查询
@@ -112,6 +124,35 @@ public class ArticleServiceV1 {
           });
     }
     return articles;
+  }
+
+  public void addRemoveGroups(long articleId, String[] toAdd, String[] toRemove) {
+    String articleKey = RedisKeys.articleKey(articleId);
+    try (StatefulRedisConnection<String, String> conn = redisClient.connect()) {
+      RedisCommands<String, String> commands = conn.sync();
+      if (toAdd != null) {
+        Arrays.stream(toAdd).forEach(e -> commands.sadd(RedisKeys.groupKey(e), articleKey));
+      }
+      if (toRemove != null) {
+        Arrays.stream(toRemove).forEach(e -> commands.srem(RedisKeys.groupKey(e), articleKey));
+      }
+    }
+  }
+
+  public List<ArticleV1> getGroupArticles(String group, String order, int page, int size) {
+    if (order == null) {
+      order = RedisKeys.SCORE;
+    }
+    String scoreGroupKey = RedisKeys.scoreGroupKey(group);
+    try (StatefulRedisConnection<String, String> conn = redisClient.connect()) {
+      RedisCommands<String, String> commands = conn.sync();
+      if (commands.exists(scoreGroupKey) == 0) {
+        commands.zinterstore(scoreGroupKey, ZStoreArgs.Builder.max(), RedisKeys.groupKey(group),
+            order);
+        commands.expire(scoreGroupKey, 600);
+      }
+    }
+    return getArticles(scoreGroupKey, page, size);
   }
 
   interface RedisKeys {
@@ -131,6 +172,14 @@ public class ArticleServiceV1 {
 
     static String userKey(long id) {
       return String.format("%s%d", "user:", id);
+    }
+
+    static String groupKey(String group) {
+      return String.format("%s%s", "group:", group);
+    }
+
+    static String scoreGroupKey(String group) {
+      return String.format("%s%s", "score:", group);
     }
   }
 }
