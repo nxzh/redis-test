@@ -12,15 +12,19 @@ public class ArticleV1 {
   private String poster;
   private long time;
   private Integer votes;
+  private Integer downVotes;
 
-  public ArticleV1() {}
+  public ArticleV1() {
+  }
 
-  public ArticleV1(String title, String link, String poster, long time, Integer votes) {
+  public ArticleV1(String title, String link, String poster, long time, Integer votes,
+      Integer dVotes) {
     this.title = title;
     this.link = link;
     this.poster = poster;
     this.time = time;
     this.votes = votes;
+    this.downVotes = dVotes;
   }
 
   public Long getId() {
@@ -71,6 +75,14 @@ public class ArticleV1 {
     this.votes = votes;
   }
 
+  public Integer getDownVotes() {
+    return downVotes;
+  }
+
+  public void setDownVotes(Integer downVotes) {
+    this.downVotes = downVotes;
+  }
+
   public static ArticleV1 from(Map<String, String> dataMap) {
     ArticleV1 article = new ArticleV1();
     article.setLink(dataMap.get("link"));
@@ -78,6 +90,7 @@ public class ArticleV1 {
     article.setTime(Long.parseLong(dataMap.get("time")));
     article.setVotes(Integer.parseInt(dataMap.get("votes")));
     article.setTitle(dataMap.get("title"));
+    article.setDownVotes(Integer.parseInt(dataMap.get("downVotes")));
     String idVal = dataMap.get("id");
     if (Objects.nonNull(idVal)) {
       article.setId(Long.parseLong(dataMap.get("id")));
@@ -92,6 +105,7 @@ public class ArticleV1 {
     ret.put("poster", this.getPoster());
     ret.put("time", Long.toString(this.getTime()));
     ret.put("votes", this.getVotes().toString());
+    ret.put("downVotes", this.getDownVotes().toString());
     return ret;
   }
 
@@ -104,6 +118,7 @@ public class ArticleV1 {
         ", poster='" + poster + '\'' +
         ", time=" + time +
         ", votes=" + votes +
+        ", downVotes=" + downVotes +
         '}';
   }
 }

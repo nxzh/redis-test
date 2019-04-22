@@ -1,5 +1,6 @@
 package fun.code4.redis.v1;
 
+import static fun.code4.redis.v1.ArticleServiceV1.RedisKeys.downVotedKey;
 import static fun.code4.redis.v1.ArticleServiceV1.RedisKeys.votedKey;
 
 import io.lettuce.core.RedisClient;
@@ -30,10 +31,31 @@ public class ArticleServiceV1 {
     }
   }
 
+  private boolean checkCanScore(long cutoff, long articleId) {
+    try (StatefulRedisConnection<String, String> conn = redisClient.connect()) {
+      RedisCommands<String, String> commands = conn.sync();
+      // 获取 article 的发帖时间
+      // zset操作: time:
+      // 获取 article:article_id 的分数(即创建时间)
+      Double createTime = commands.zscore(RedisKeys.TIME, RedisKeys.articleKey(articleId));
+      if (createTime < cutoff) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   public void downVote(long userId, long articleId) {
     try (StatefulRedisConnection<String, String> conn = redisClient.connect()) {
       RedisCommands<String, String> commands = conn.sync();
-
+      long cutoff = Instant.now().getEpochSecond() - ONE_WEEK_IN_SECONDS;
+      if (!checkCanScore(cutoff, articleId)) {
+        return;
+      }
+      if (commands.sadd(downVotedKey(articleId), RedisKeys.userKey(userId)) == 1L) {
+        commands.zincrby(RedisKeys.SCORE, 0 - VOTE_SCORE, RedisKeys.articleKey(articleId));
+        commands.hincrby(RedisKeys.articleKey(articleId), RedisKeys.ARTICLE_DOWN_VOTES, 1L);
+      }
     }
   }
 
@@ -41,12 +63,7 @@ public class ArticleServiceV1 {
     try (StatefulRedisConnection<String, String> conn = redisClient.connect()) {
       RedisCommands<String, String> commands = conn.sync();
       long cutoff = Instant.now().getEpochSecond() - ONE_WEEK_IN_SECONDS;
-      // 获取 article 的发帖时间
-      // zset操作: time:
-      // 获取 article:article_id 的分数(即创建时间)
-      Double createTime = commands.zscore(RedisKeys.TIME, RedisKeys.articleKey(articleId));
-      System.out.println("createTime == " + createTime);
-      if (createTime < cutoff) {
+      if (!checkCanScore(cutoff, articleId)) {
         return;
       }
       // 添加投票人
@@ -70,10 +87,12 @@ public class ArticleServiceV1 {
       RedisCommands<String, String> commands = conn.sync();
       // 获取下一个 article id
       long nextArticleId = commands.incr(RedisKeys.ARTICLE);
-      // 创建帖子得分集合, 第一个投票人为创建者
+      // 创建帖子得分集合, 帖子创建者不能投票
       // set 操作: voted:article_id
       // 将 user:user_id 放到 voted:article_id 中
       commands.sadd(RedisKeys.votedKey(nextArticleId), RedisKeys.userKey(userId));
+      // 帖子创建者不能投反对票
+      commands.sadd(RedisKeys.downVotedKey(nextArticleId), RedisKeys.userKey(userId));
       // 设置一周后不能投票.
       // voted:article_id
       // 设置过期时间
@@ -161,6 +180,7 @@ public class ArticleServiceV1 {
     String SCORE = "score:";
     String ARTICLE = "article:";
     String ARTICLE_VOTES = "votes";
+    String ARTICLE_DOWN_VOTES = "downVotes";
 
     static String articleKey(long id) {
       return String.format("%s%d", "article:", id);
@@ -180,6 +200,10 @@ public class ArticleServiceV1 {
 
     static String scoreGroupKey(String group) {
       return String.format("%s%s", "score:", group);
+    }
+
+    static String downVotedKey(long id) {
+      return String.format("%s%d", "downVoted:", id);
     }
   }
 }
