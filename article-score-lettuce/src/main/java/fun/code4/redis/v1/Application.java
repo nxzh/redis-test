@@ -24,22 +24,23 @@ public class Application {
 
   private static Map<Long, ArticleV1> getArticleMap() {
     Map<Long, ArticleV1> articleV1Map = new HashMap<>();
+    long now = Instant.now().getEpochSecond();
     articleV1Map.put(
-        100001L, new ArticleV1("title1", "link1", "user1", Instant.now().getEpochSecond(), 0));
+        100001L, new ArticleV1("title1", "link1", "user1", now++, 0));
     articleV1Map.put(
-        100002L, new ArticleV1("title2", "link2", "user2", Instant.now().getEpochSecond(), 0));
+        100002L, new ArticleV1("title2", "link2", "user2", now++, 0));
     articleV1Map.put(
-        100003L, new ArticleV1("title3", "link3", "user3", Instant.now().getEpochSecond(), 0));
+        100003L, new ArticleV1("title3", "link3", "user3", now++, 0));
     articleV1Map.put(
-        100004L, new ArticleV1("title4", "link4", "user4", Instant.now().getEpochSecond(), 0));
+        100004L, new ArticleV1("title4", "link4", "user4", now++, 0));
     articleV1Map.put(
-        100005L, new ArticleV1("title5", "link5", "user5", Instant.now().getEpochSecond(), 0));
+        100005L, new ArticleV1("title5", "link5", "user5", now++, 0));
     articleV1Map.put(
-        100006L, new ArticleV1("title6", "link6", "user6", Instant.now().getEpochSecond(), 0));
+        100006L, new ArticleV1("title6", "link6", "user6", now++, 0));
     return articleV1Map;
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
     ApplicationContext ac = new AnnotationConfigApplicationContext(BeanConfiguration.class);
     ArticleServiceV1 articleService = ac.getBean("articleService", ArticleServiceV1.class);
     System.out.println(articleService);
@@ -47,6 +48,7 @@ public class Application {
     List<Long> ids = new ArrayList<>();
     for (Entry<Long, ArticleV1> entry : map.entrySet()) {
       long id = articleService.post(entry.getKey(), entry.getValue());
+      Thread.sleep(1000);
       ids.add(id);
       System.out.println("New Post with id: " + id);
     }
