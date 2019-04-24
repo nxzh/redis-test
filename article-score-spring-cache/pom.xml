@@ -9,7 +9,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>article-score-spring</artifactId>
+  <artifactId>article-score-spring-cache</artifactId>
 
   <dependencies>
     <dependency>
@@ -29,11 +29,6 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -43,4 +38,5 @@
       </plugin>
     </plugins>
   </build>
+
 </project>

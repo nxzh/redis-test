@@ -67,26 +67,26 @@ public class Application implements CommandLineRunner {
     for (Article articleV1 : articleV1s) {
       System.out.println(articleV1);
     }
-    // 投票
-    articleService.upVote(100002, 6);
-    articleService.upVote(100003, 6);
-    articleService.upVote(100004, 6);
-    articleService.upVote(100006, 6);
-
-//    // 投反对票
-    articleService.downVote(100005, 6);
-    articleService.downVote(100006, 6);
-
-    articleService.addRemoveGroups(1L, new String[]{"programing", "java"}, null);
-    articleService.addRemoveGroups(2L, new String[]{"programing", "java"}, null);
-    articleService.addRemoveGroups(3L, new String[]{"programing", "java"}, null);
-    articleService.addRemoveGroups(4L, new String[]{"programing", "java"}, null);
-    articleService.addRemoveGroups(5L, new String[]{"programing", "java"}, null);
-    articleService.addRemoveGroups(6L, new String[]{"programing", "java"}, null);
-    articleService.addRemoveGroups(3L, null, new String[]{"java"});
-    List<Article> groupArticles = articleService.getGroupArticles("java", 1, 10);
-    for (Article articleV1 : groupArticles) {
-      System.out.println(articleV1);
-    }
+//    // 投票
+//    articleService.upVote(100002, 6);
+//    articleService.upVote(100003, 6);
+//    articleService.upVote(100004, 6);
+//    articleService.upVote(100006, 6);
+//
+////    // 投反对票
+//    articleService.downVote(100005, 6);
+//    articleService.downVote(100006, 6);
+//
+//    articleService.addRemoveGroups(1L, new String[]{"programing", "java"}, null);
+//    articleService.addRemoveGroups(2L, new String[]{"programing", "java"}, null);
+//    articleService.addRemoveGroups(3L, new String[]{"programing", "java"}, null);
+//    articleService.addRemoveGroups(4L, new String[]{"programing", "java"}, null);
+//    articleService.addRemoveGroups(5L, new String[]{"programing", "java"}, null);
+//    articleService.addRemoveGroups(6L, new String[]{"programing", "java"}, null);
+//    articleService.addRemoveGroups(3L, null, new String[]{"java"});
+//    List<Article> groupArticles = articleService.getGroupArticles("java", 1, 10);
+//    for (Article articleV1 : groupArticles) {
+//      System.out.println(articleV1);
+//    }
   }
 }
