@@ -1,5 +1,9 @@
 package fun.code4.redis;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 public class Article {
 
   private long id;
@@ -76,5 +80,45 @@ public class Article {
 
   public void setDownVotes(int downVotes) {
     this.downVotes = downVotes;
+  }
+
+
+  public static Article from(Map<String, String> dataMap) {
+    Article article = new Article();
+    article.setLink(dataMap.get("link"));
+    article.setPoster(dataMap.get("poster"));
+    article.setTime(Long.parseLong(dataMap.get("time")));
+    article.setVotes(Integer.parseInt(dataMap.get("votes")));
+    article.setTitle(dataMap.get("title"));
+    article.setDownVotes(Integer.parseInt(dataMap.get("downVotes")));
+    String idVal = dataMap.get("id");
+    if (Objects.nonNull(idVal)) {
+      article.setId(Long.parseLong(dataMap.get("id")));
+    }
+    return article;
+  }
+
+  public Map<String, String> toMap() {
+    Map<String, String> ret = new HashMap<>();
+    ret.put("title", this.getTitle());
+    ret.put("link", this.getLink());
+    ret.put("poster", this.getPoster());
+    ret.put("time", Long.toString(this.getTime()));
+    ret.put("votes", Integer.toString(this.getVotes()));
+    ret.put("downVotes", Integer.toString(this.getDownVotes()));
+    return ret;
+  }
+
+  @Override
+  public String toString() {
+    return "Article{" +
+        "id=" + id +
+        ", title='" + title + '\'' +
+        ", link='" + link + '\'' +
+        ", poster='" + poster + '\'' +
+        ", time=" + time +
+        ", votes=" + votes +
+        ", downVotes=" + downVotes +
+        '}';
   }
 }

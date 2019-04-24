@@ -1,7 +1,13 @@
 package fun.code4.redis;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import org.springframework.data.redis.connection.RedisZSetCommands.Aggregate;
 import org.springframework.data.redis.core.RedisTemplate;
 
 public class ArticleService {
@@ -62,20 +68,64 @@ public class ArticleService {
   }
 
   public long post(long userId, Article article) {
-    long nextArticleId =
-    return 1L;
+    long nextArticleId = redisTemplate.opsForValue().increment(RedisKeys.ARTICLE);
+    redisTemplate.opsForSet().add(RedisKeys.votedKey(nextArticleId), RedisKeys.userKey(userId));
+    redisTemplate.opsForSet().add(RedisKeys.downVotedKey(nextArticleId), RedisKeys.userKey(userId));
+    redisTemplate.expire(RedisKeys.votedKey(nextArticleId), ONE_WEEK_IN_SECONDS, TimeUnit.SECONDS);
+    redisTemplate.<String, String>opsForHash()
+        .putAll(RedisKeys.articleKey(nextArticleId), article.toMap());
+    long now = Instant.now().getEpochSecond();
+    redisTemplate.opsForZSet()
+        .add(RedisKeys.SCORE, RedisKeys.articleKey(nextArticleId), now + VOTE_SCORE);
+    redisTemplate.opsForZSet().add(RedisKeys.TIME, RedisKeys.articleKey(nextArticleId), now);
+    return nextArticleId;
   }
 
-  public List<Article> getArticles(String order, int page, int size) {
-
-    return null;
+  public List<Article> getArticles(int page, int size) {
+    return getArticles(RedisKeys.SCORE, page, size);
   }
 
-  public void addRemoveGroups(long articleId, String[] toAdd, String[] toRemove) {}
+  private List<Article> getArticles(String order, int page, int size) {
+    List<Article> articles = new ArrayList<>(size);
+    int start = (page - 1) * ARTICLES_PER_PAGE;
+    int end = start + ARTICLES_PER_PAGE - 1;
 
-  public List<Article> getGroupArticles(String group, String order, int page, int size) {
+    Set<String> ids = redisTemplate.opsForZSet().reverseRange(order, start, end);
+    ids.forEach(
+        id -> {
+          Map<String, String> dataMap = redisTemplate.<String, String>opsForHash().entries(id);
+          String idVal = id.substring(id.indexOf(':') + 1);
+          dataMap.put("id", idVal);
+          articles.add(Article.from(dataMap));
+        });
+    return articles;
+  }
 
-    return null;
+  public void addRemoveGroups(long articleId, String[] toAdd, String[] toRemove) {
+    String articleKey = RedisKeys.articleKey(articleId);
+    if (toAdd != null) {
+      Arrays.stream(toAdd).forEach(e ->
+          redisTemplate.opsForSet().add(RedisKeys.groupKey(e), articleKey));
+    }
+    if (toRemove != null) {
+      Arrays.stream(toRemove)
+          .forEach(e -> redisTemplate.opsForSet().remove(RedisKeys.groupKey(e), articleKey));
+    }
+  }
+
+  public List<Article> getGroupArticles(String group, int page, int size) {
+    return getGroupArticles(group, RedisKeys.SCORE, page, size);
+  }
+
+  private List<Article> getGroupArticles(String group, String order, int page, int size) {
+    String scoreGroupKey = RedisKeys.scoreGroupKey(group);
+    if (redisTemplate.countExistingKeys(Arrays.asList(scoreGroupKey)) == 0L) {
+      redisTemplate.opsForZSet()
+          .intersectAndStore(RedisKeys.groupKey(group), Arrays.asList(order), scoreGroupKey,
+              Aggregate.MAX);
+      redisTemplate.expire(scoreGroupKey, 600, TimeUnit.SECONDS);
+    }
+    return getArticles(scoreGroupKey, page, size);
   }
 
   interface RedisKeys {
