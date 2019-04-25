@@ -1,21 +1,36 @@
 package fun.code4.redis;
 
+import java.time.Duration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class BeanConfiguration {
 
   @Bean
-  public LettuceConnectionFactory redisConnectionFactory() {
-    RedisStandaloneConfiguration config = new RedisStandaloneConfiguration("10.61.213.105", 8087);
-    config.setDatabase(1);
-    config.setPassword("P@s5word");
-    LettuceConnectionFactory lcf = new LettuceConnectionFactory(config);
-//    lcf.setShareNativeConnection(false);
-    return lcf;
+  public RedisCacheConfiguration cacheConfiguration() {
+    RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .entryTtl(Duration.ofSeconds(600))
+//        .prefixKeysWith("ttt")
+        .disableCachingNullValues()
+        .serializeKeysWith(SerializationPair.fromSerializer(keySerializer()))
+        .serializeValuesWith(SerializationPair.fromSerializer(valueSerializer()));
+    return cacheConfig;
+  }
+
+  @Bean
+  public RedisSerializer<String> keySerializer() {
+    return new StringRedisSerializer();
+  }
+
+  @Bean
+  public RedisSerializer<Object> valueSerializer() {
+    return new GenericJackson2JsonRedisSerializer();
   }
 
   @Bean

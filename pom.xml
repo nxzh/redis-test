@@ -28,6 +28,7 @@
     <spring.version>5.1.6.RELEASE</spring.version>
     <lettuce.version>5.1.6.RELEASE</lettuce.version>
     <jackson.version>2.9.8</jackson.version>
+    <common.pool.version>2.6.0</common.pool.version>
   </properties>
 
   <dependencies>

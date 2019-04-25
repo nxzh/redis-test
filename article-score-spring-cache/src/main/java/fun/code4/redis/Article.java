@@ -1,7 +1,9 @@
 package fun.code4.redis;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -14,9 +16,12 @@ public class Article {
   private long time;
   private int votes;
   private int downVotes;
+  private List<String> tags = new ArrayList<>();
 
   public Article() {
+    initTags();
   }
+
   public Article(String title, String link, String poster, long time, int votes, int dVotes) {
     this.title = title;
     this.link = link;
@@ -24,6 +29,13 @@ public class Article {
     this.time = time;
     this.votes = votes;
     this.downVotes = dVotes;
+    initTags();
+  }
+
+  private void initTags() {
+    tags.add("A");
+    tags.add("B");
+    tags.add("C");
   }
 
   public long getId() {

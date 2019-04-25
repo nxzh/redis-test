@@ -29,6 +29,16 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>
+    <dependency>
+      <artifactId>commons-pool2</artifactId>
+      <groupId>org.apache.commons</groupId>
+      <version>${common.pool.version}</version>
+    </dependency>
+    <dependency>
+      <artifactId>jackson-databind</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <version>${jackson.version}</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
