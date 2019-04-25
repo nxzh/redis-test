@@ -7,9 +7,6 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class BeanConfiguration {
@@ -24,31 +21,31 @@ public class BeanConfiguration {
     return lcf;
   }
 
+  @Bean
+  public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+    return new StringRedisTemplate(redisConnectionFactory);
+  }
+
   //  @Bean
-  //  public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-  //    return new StringRedisTemplate(redisConnectionFactory);
-  //  }
-
-  @Bean
-  public StringRedisTemplate redisTemplate(RedisConnectionFactory rcf) {
-    StringRedisTemplate srt = new StringRedisTemplate(rcf);
-    srt.setKeySerializer(keySerializer());
-    srt.setHashKeySerializer(keySerializer());
-    srt.setValueSerializer(valueSerializer());
-    srt.setHashValueSerializer(valueSerializer());
-    return srt;
-  }
-
-  @Bean
-  public RedisSerializer<String> keySerializer() {
-    return new StringRedisSerializer();
-  }
-
-  @Bean
-  public RedisSerializer<Object> valueSerializer() {
-    return new GenericJackson2JsonRedisSerializer();
-  }
-
+//  public StringRedisTemplate redisTemplate(RedisConnectionFactory rcf) {
+//    StringRedisTemplate srt = new StringRedisTemplate(rcf);
+//    srt.setKeySerializer(keySerializer());
+//    srt.setHashKeySerializer(keySerializer());
+//    srt.setValueSerializer(valueSerializer());
+//    srt.setHashValueSerializer(valueSerializer());
+//    return srt;
+//  }
+//
+//  @Bean
+//  public RedisSerializer<String> keySerializer() {
+//    return new StringRedisSerializer();
+//  }
+//
+//  @Bean
+//  public RedisSerializer<Object> valueSerializer() {
+//    return new GenericJackson2JsonRedisSerializer();
+//  }
+//
   @Bean
   public ArticleService articleService(RedisTemplate redisTemplate) {
     return new ArticleService(redisTemplate);
