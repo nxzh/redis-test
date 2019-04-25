@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.springframework.data.redis.connection.RedisZSetCommands.Aggregate;
@@ -16,14 +15,10 @@ public class ArticleService {
   private static final Integer VOTE_SCORE = 432;
   private static final Integer ARTICLES_PER_PAGE = 5;
 
-  private RedisTemplate<String, String> redisTemplate;
+  private RedisTemplate redisTemplate;
 
-  public ArticleService(RedisTemplate<String, String> redisTemplate) {
+  public ArticleService(RedisTemplate redisTemplate) {
     this.redisTemplate = redisTemplate;
-  }
-
-  public void test() {
-    System.out.println(redisTemplate);
   }
 
   private boolean checkCanScore(long cutoff, long articleId) {
@@ -45,9 +40,10 @@ public class ArticleService {
       redisTemplate
           .opsForZSet()
           .incrementScore(RedisKeys.SCORE, RedisKeys.articleKey(articleId), 0 - VOTE_SCORE);
-      redisTemplate
-          .opsForHash()
-          .increment(RedisKeys.articleKey(articleId), RedisKeys.ARTICLE_DOWN_VOTES, 1L);
+
+      Article article = (Article) redisTemplate.opsForValue().get(RedisKeys.articleKey(articleId));
+      article.setDownVotes(article.getVotes() - 1);
+      redisTemplate.opsForValue().set(RedisKeys.articleKey(articleId), article);
     }
   }
 
@@ -61,9 +57,9 @@ public class ArticleService {
       redisTemplate
           .opsForZSet()
           .incrementScore(RedisKeys.SCORE, RedisKeys.articleKey(articleId), VOTE_SCORE);
-      redisTemplate
-          .opsForHash()
-          .increment(RedisKeys.articleKey(articleId), RedisKeys.ARTICLE_VOTES, 1L);
+      Article article = (Article) redisTemplate.opsForValue().get(RedisKeys.articleKey(articleId));
+      article.setDownVotes(article.getVotes() + 1);
+      redisTemplate.opsForValue().set(RedisKeys.articleKey(articleId), article);
     }
   }
 
@@ -72,8 +68,7 @@ public class ArticleService {
     redisTemplate.opsForSet().add(RedisKeys.votedKey(nextArticleId), RedisKeys.userKey(userId));
     redisTemplate.opsForSet().add(RedisKeys.downVotedKey(nextArticleId), RedisKeys.userKey(userId));
     redisTemplate.expire(RedisKeys.votedKey(nextArticleId), ONE_WEEK_IN_SECONDS, TimeUnit.SECONDS);
-    redisTemplate.<String, String>opsForHash()
-        .putAll(RedisKeys.articleKey(nextArticleId), article.toMap());
+    redisTemplate.opsForValue().set(RedisKeys.articleKey(nextArticleId), article);
     long now = Instant.now().getEpochSecond();
     redisTemplate.opsForZSet()
         .add(RedisKeys.SCORE, RedisKeys.articleKey(nextArticleId), now + VOTE_SCORE);
@@ -93,10 +88,10 @@ public class ArticleService {
     Set<String> ids = redisTemplate.opsForZSet().reverseRange(order, start, end);
     ids.forEach(
         id -> {
-          Map<String, String> dataMap = redisTemplate.<String, String>opsForHash().entries(id);
+          Article article = (Article) redisTemplate.opsForValue().get(id);
           String idVal = id.substring(id.indexOf(':') + 1);
-          dataMap.put("id", idVal);
-          articles.add(Article.from(dataMap));
+          article.setId(Long.parseLong(idVal));
+          articles.add(article);
         });
     return articles;
   }
