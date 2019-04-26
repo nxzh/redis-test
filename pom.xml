@@ -17,6 +17,7 @@
     <module>article-score-lettuce</module>
     <module>article-score-spring</module>
     <module>article-score-spring-cache</module>
+    <module>session-mvc-lettuce</module>
   </modules>
 
   <properties>
@@ -29,6 +30,7 @@
     <lettuce.version>5.1.6.RELEASE</lettuce.version>
     <jackson.version>2.9.8</jackson.version>
     <common.pool.version>2.6.0</common.pool.version>
+    <javax.servlet.version>3.1.0</javax.servlet.version>
   </properties>
 
   <dependencies>
