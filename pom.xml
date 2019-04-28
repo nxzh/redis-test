@@ -17,7 +17,7 @@
     <module>article-score-lettuce</module>
     <module>article-score-spring</module>
     <module>article-score-spring-cache</module>
-    <module>session-mvc-lettuce</module>
+    <module>session-spring-mvc</module>
   </modules>
 
   <properties>
