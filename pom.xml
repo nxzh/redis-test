@@ -18,6 +18,7 @@
     <module>article-score-spring</module>
     <module>article-score-spring-cache</module>
     <module>session-spring-mvc</module>
+    <module>pub-sub-basic</module>
   </modules>
 
   <properties>
