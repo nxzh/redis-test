@@ -19,6 +19,7 @@
     <module>article-score-spring-cache</module>
     <module>session-spring-mvc</module>
     <module>pub-sub-basic</module>
+    <module>tx-spring-data-redis</module>
   </modules>
 
   <properties>
