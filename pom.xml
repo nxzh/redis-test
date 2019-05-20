@@ -27,7 +27,7 @@
     <junit.jupiter.version>5.3.1</junit.jupiter.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>1.8</java.version>
+      <java.version>1.11</java.version>
     <spring.version>5.1.6.RELEASE</spring.version>
     <lettuce.version>5.1.6.RELEASE</lettuce.version>
     <jackson.version>2.9.8</jackson.version>
@@ -61,5 +61,12 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

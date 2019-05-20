@@ -11,24 +11,30 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class BeanConfiguration {
 
-  @Bean
-  public RedisTemplate redisTemplate(RedisConnectionFactory rcf) {
-    RedisTemplate srt = new RedisTemplate();
-    srt.setConnectionFactory(rcf);
-    srt.setKeySerializer(keySerializer());
-    srt.setHashKeySerializer(keySerializer());
-    srt.setValueSerializer(valueSerializer());
-    srt.setHashValueSerializer(valueSerializer());
-    return srt;
-  }
+    @Bean
+    public ArticleService articleService(RedisTemplate redisTemplate) {
+        return new ArticleService(redisTemplate);
+    }
 
-  @Bean
-  public RedisSerializer<String> keySerializer() {
-    return new StringRedisSerializer();
-  }
+    @Bean
+    public RedisTemplate redisTemplate(RedisConnectionFactory rcf) {
+        RedisTemplate srt = new RedisTemplate();
+        srt.setConnectionFactory(rcf);
+        srt.setKeySerializer(keySerializer());
+        srt.setHashKeySerializer(keySerializer());
+        srt.setValueSerializer(valueSerializer());
+        srt.setHashValueSerializer(valueSerializer());
+//        srt.setEnableTransactionSupport(true);
+        return srt;
+    }
 
-  @Bean
-  public RedisSerializer<Object> valueSerializer() {
-    return new GenericJackson2JsonRedisSerializer();
-  }
+    @Bean
+    public RedisSerializer<String> keySerializer() {
+        return new StringRedisSerializer();
+    }
+
+    @Bean
+    public RedisSerializer<Object> valueSerializer() {
+        return new GenericJackson2JsonRedisSerializer();
+    }
 }
